@@ -1,8 +1,28 @@
 # mail-utils
 
-A C# console  utility to send email from the command line, including attachments. The use case that it was developed for was to email nightly log snippets from an EC2 processing server to a group of administrators so they could review the logs from their phones rather than having to start the server up, remote into it, and review the logs there. In this particular case the server only ran in the off-hours and was shut down in the early morning hours after the nightly processing job completed.
+A C# console utility to send email from the command line, including attachments. The use case that it was developed for was to email nightly log snippets from an EC2 processing server to a group of administrators so they could review the logs from their phones rather than having to start the server up, remote into it, and review the logs there. In this particular case the server only ran in the off-hours and was shut down in the early morning hours after the nightly processing job completed.
 
 Note - this utility uses my command-line parser `appsettings` for option parsing and displaying  usage instruction. That is a DLL project also hosted in GitHub: https://github.com/aceeric/appsettings.
+
+### An Example
+
+Here is an example from a PowerShell script that emails a log snippet. The full script runs as the last step in a larger processing stream. It clips the current night's log segment out of the full log, and writes it to a file named *temp-log.txt* in the current working directory. Then it invokes this statement to mail the logs to all responsible parties:
+
+```powershell
+.\mail-utils -to "notta.person@gmail.com,also.not@xyz.edu,etc..." `
+ -from "SYSTEM PROCESS <robot@mycorp.com>" `
+ -body "See subject" `
+ -subject "Nightly Logs are attached: please review" `
+ -attachment .\temp-log.txt `
+ -server smtp.zzzzz.com `
+ -port 587 `
+ -user 0xENCRYPTEDUSERGOESHERE `
+ -pass 0xENCRYPTEDPASSWORDGOESHERE `
+ -ssltype auto `
+ -encrypted `
+ -log db `
+ -loglevel info
+```
 
 ### Command line options and parameters
 
@@ -69,26 +89,6 @@ Optional. Defines the logging level. `err` specifies that only errors will be re
 **-jobid guid**
 
 Optional. Defines a job ID for the logging subsystem. A GUID value is supplied in the canonical 8-4-4-4-12 form. If provided, then the logging subsystem is initialized with the provided GUID. The default behavior is for the logging subsystem to generate its own GUID. The idea behind this option is - loading a file  might be one step in a multi-step job. Logging to the database and identifying each step with a GUID allows one to tie together job steps executed across different tooling using the job GUID.
-
-### An Example
-
-Here is an example from a PowerShell script that emails a log snippet. The full script runs as the last step in a larger processing stream. It clips the current night's log segment out of the full log, and writes it to a file named *temp-log.txt* in the current working directory. Then it invokes this statement to mail the logs to all responsible parties:
-
-```powershell
-.\mail-utils -to "notta.person@gmail.com,also.not@xyz.edu,etc..." `
- -from "SYSTEM PROCESS <robot@mycorp.com>" `
- -body "See subject" `
- -subject "Nightly Logs are attached: please review" `
- -attachment .\temp-log.txt `
- -server smtp.zzzzz.com `
- -port 587 `
- -user 0xENCRYPTEDUSERGOESHERE `
- -pass 0xENCRYPTEDPASSWORDGOESHERE `
- -ssltype auto `
- -encrypted `
- -log db `
- -loglevel info
-```
 
 *Note: this utility - along with most of the C# in by repo - was created as part of a private project. The project completed and the sponsor was kind enough to grant me the right to host the code in my repo. Hence no commit history.*
 
